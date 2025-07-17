@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import requests
 import datetime
 import os
+from dotenv import load_dotenv
+
 
 app = FastAPI()
 
@@ -15,6 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+load_dotenv()
 API_KEY = os.getenv('AMADEUS_API_KEY')
 API_SECRET = os.getenv('AMADEUS_API_SECRET')
 
