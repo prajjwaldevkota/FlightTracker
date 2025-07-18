@@ -129,7 +129,7 @@ export default function MainResults({ results, form }) {
         <Typography variant="h4" fontWeight={700} mb={1}>
           <FlightTakeoffIcon sx={{ fontSize: 32, mr: 1 }} />
           Search Results ({results.length})
-        </Typography>
+        </Typography> 
         <Typography variant="body2" sx={{ opacity: 0.9 }}>
           Found {results.length} flight options for your trip
         </Typography>
@@ -139,8 +139,7 @@ export default function MainResults({ results, form }) {
         container 
         spacing={3}
         sx={{
-          // Remove the overflowX that was causing horizontal scroll
-          justifyContent: 'center', // Center the grid items
+          justifyContent: 'center',
         }}
       >
         {results.map((flight) => {
