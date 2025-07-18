@@ -69,4 +69,51 @@ def search_flights(
         })
     if len(results) == 0:
         return {"results": "No flights found"}
-    return {"results": results} 
+    return {"results": results}
+
+def search_kiwi_rapidapi(
+    source, destination, departure_date, return_date=None, currency="usd", adults=1, children=0, infants=0, limit=10
+):
+    if return_date:
+        url = "https://kiwi-com-cheap-flights.p.rapidapi.com/round-trip"
+    else:
+        url = "https://kiwi-com-cheap-flights.p.rapidapi.com/one-way"
+
+    
+    headers = {
+        "x-rapidapi-host": "kiwi-com-cheap-flights.p.rapidapi.com",
+        "x-rapidapi-key": os.getenv("RAPIDAPI_KEY", "265829f9a3msha523a8a443d66e6p1188a9jsnd173909352a7"),
+    }
+    params = {
+        "source": source,
+        "destination": destination,
+        "currency": currency,
+        "adults": adults,
+        "children": children,
+        "infants": infants,
+        "limit": limit,
+        "outboundDepartmentDateStart": departure_date,
+        "outboundDepartmentDateEnd": departure_date,
+    }
+    if return_date:
+        params["inboundDepartureDateStart"] = return_date
+        params["inboundDepartureDateEnd"] = return_date
+    response = requests.get(url, headers=headers, params=params)
+    return response.json()
+
+@app.get("/compare-flights-kiwi")
+def compare_flights_kiwi(
+    source: str,
+    destination: str,
+    departure_date: str,  # required
+    return_date: str = None,  # optional
+    currency: str = "usd",
+    adults: int = 1,
+    children: int = 0,
+    infants: int = 0,
+    limit: int = 10
+):
+    kiwi_results = search_kiwi_rapidapi(
+        source, destination, departure_date, return_date, currency, adults, children, infants, limit
+    )
+    return {"itineraries": kiwi_results.get('itineraries', []), "metadata": kiwi_results.get('metadata', {})} 
