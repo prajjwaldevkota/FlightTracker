@@ -1,4 +1,10 @@
 import React, { useState } from "react";
+import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
+import Box from '@mui/material/Box';
 import FlightSearchForm from "./FlightSearchForm";
 import MainResults from "./MainResults";
 import KiwiResults from "./KiwiResults";
@@ -58,61 +64,94 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col items-center p-4 md:p-8">
-      <h1 className="text-4xl font-extrabold mb-2 mt-6 text-blue-800 tracking-tight drop-shadow">Flight Price Tracker</h1>
-      <p className="mb-8 text-gray-600 text-center max-w-xl">Find the best flight deals. Enter your route and dates below!</p>
-      <FlightSearchForm
-        form={form}
-        handleChange={handleChange}
-        handleSubmit={handleSubmit}
-        loading={loading}
-      />
-      {error && (
-        <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4 max-w-xl w-full text-center border border-red-200">
-          {error}
-        </div>
-      )}
-      <MainResults results={results} form={form} />
-      {/* Compare Provider button, only shown if Kiwi not yet shown and main results exist */}
-      {results.length > 0 && !showKiwi && (
-        <button
-          className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold shadow hover:bg-green-700 transition"
-          onClick={async () => {
-            setKiwiLoading(true);
-            setKiwiError("");
-            try {
-              const params = new URLSearchParams({
-                source: `City:${form.origin}`,
-                destination: `City:${form.destination}`,
-                departure_date: form.departure_date,
-                currency: form.currency,
-                adults: form.adults,
-                children: form.children,
-                infants: form.infants,
-                limit: form.max,
-              });
-              if (form.return_date) {
-                params.append('return_date', form.return_date);
+    <Box sx={{
+      minHeight: '100vh',
+      width: '100vw',
+      background: 'linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 100%)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+      py: { xs: 2, md: 6 },
+      px: 0,
+      overflowX: 'hidden',
+    }}>
+      <Paper elevation={0} sx={{
+        width: '100%',
+        maxWidth: 900,
+        mx: 'auto',
+        my: { xs: 1, md: 4 },
+        px: { xs: 1, sm: 2, md: 4 },
+        py: { xs: 2, md: 4 },
+        borderRadius: 5,
+        backdropFilter: 'blur(16px)',
+        background: 'rgba(255,255,255,0.65)',
+        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.10)',
+        border: '1px solid rgba(255,255,255,0.18)',
+      }}>
+        <Typography variant="h2" fontWeight={800} mb={2} mt={2} color="primary" align="center" sx={{ textShadow: '0 2px 4px #cbd5e1', fontSize: { xs: 28, sm: 36, md: 44 } }}>
+          Flight Price Tracker
+        </Typography>
+        <Typography mb={4} color="text.secondary" align="center" maxWidth="xl" sx={{ fontSize: { xs: 15, sm: 18 } }}>
+          Find the best flight deals. Enter your route and dates below!
+        </Typography>
+        <FlightSearchForm
+          form={form}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          loading={loading}
+        />
+        {error && (
+          <Alert severity="error" sx={{ mb: 4, maxWidth: 'xl', width: '100%', borderRadius: 2 }}>
+            {error}
+          </Alert>
+        )}
+        <MainResults results={results} form={form} />
+        {results.length > 0 && !showKiwi && (
+          <Button
+            variant="contained"
+            color="success"
+            sx={{ mt: 4, px: 6, py: 2, fontWeight: 600, boxShadow: 2, borderRadius: 2 }}
+            disabled={kiwiLoading}
+            onClick={async () => {
+              setKiwiLoading(true);
+              setKiwiError("");
+              try {
+                const params = new URLSearchParams({
+                  source: `City:${form.origin}`,
+                  destination: `City:${form.destination}`,
+                  departure_date: form.departure_date,
+                  currency: form.currency,
+                  adults: form.adults,
+                  children: form.children,
+                  infants: form.infants,
+                  limit: form.max,
+                });
+                if (form.return_date) {
+                  params.append('return_date', form.return_date);
+                }
+                const res = await fetch(`http://localhost:8000/compare-flights-kiwi?${params}`);
+                if (!res.ok) throw new Error('Kiwi API error');
+                const data = await res.json();
+                setKiwiResults(data);
+                setShowKiwi(true);
+              } catch {
+                setKiwiError('Failed to fetch Kiwi flights. Please try again.');
+              } finally {
+                setKiwiLoading(false);
               }
-              const res = await fetch(`http://localhost:8000/compare-flights-kiwi?${params}`);
-              if (!res.ok) throw new Error('Kiwi API error');
-              const data = await res.json();
-              setKiwiResults(data);
-              setShowKiwi(true);
-            } catch {
-              setKiwiError('Failed to fetch Kiwi flights. Please try again.');
-            } finally {
-              setKiwiLoading(false);
-            }
-          }}
-          disabled={kiwiLoading}
-        >
-          {kiwiLoading ? 'Loading...' : 'Compare Provider'}
-        </button>
-      )}
-      {kiwiError && <div className="text-red-600 mt-2">{kiwiError}</div>}
-      {/* Kiwi results rendering, only if user triggered and results exist */}
-      {showKiwi && <KiwiResults kiwiResults={kiwiResults} />}
-    </div>
+            }}
+          >
+            {kiwiLoading ? 'Loading...' : 'Compare Provider'}
+          </Button>
+        )}
+        {kiwiError && (
+          <Alert severity="error" sx={{ mt: 2, maxWidth: 'xl', width: '100%', borderRadius: 2 }}>
+            {kiwiError}
+          </Alert>
+        )}
+        {showKiwi && <KiwiResults kiwiResults={kiwiResults} />}
+      </Paper>
+    </Box>
   );
 }
