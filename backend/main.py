@@ -82,7 +82,7 @@ def search_kiwi_rapidapi(
     
     headers = {
         "x-rapidapi-host": "kiwi-com-cheap-flights.p.rapidapi.com",
-        "x-rapidapi-key": os.getenv("RAPIDAPI_KEY", "265829f9a3msha523a8a443d66e6p1188a9jsnd173909352a7"),
+        "x-rapidapi-key": os.getenv("RAPIDAPI_KEY"),
     }
     params = {
         "source": source,
