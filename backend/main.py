@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 
 import aiohttp
 import httpx
-from fastapi import FastAPI, Query, HTTPException, Depends, BackgroundTasks
+from fastapi import FastAPI, Query, HTTPException, Depends, BackgroundTasks, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -14,6 +14,9 @@ from pydantic import BaseModel, Field, validator
 from cachetools import TTLCache
 import os
 from dotenv import load_dotenv
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 # Load environment variables
 load_dotenv()
@@ -106,17 +109,20 @@ async def lifespan(app: FastAPI):
     await app.state.http_client.aclose()
     logger.info("Application shutdown complete")
 
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(
     title="Flight Search API",
     description="Compare flight prices from multiple providers",
     version="1.0.0",
     lifespan=lifespan
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS middleware with more restrictive settings for production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=["https://flight-pricetracker.vercel.app", "http://localhost:5173"], 
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
@@ -161,7 +167,9 @@ async def get_access_token(client: httpx.AsyncClient) -> str:
         raise HTTPException(status_code=500, detail="Failed to authenticate with Amadeus API")
 
 @app.get("/search-flights", response_model=FlightSearchResponse, tags=["flights"])
+@limiter.limit("10/minute")  # 10 requests per minute per IP
 async def search_flights(
+    request: Request,
     origin: str = Query(..., min_length=3, max_length=3),
     destination: str = Query(..., min_length=3, max_length=3),
     departure_date: str = Query(...),
@@ -169,9 +177,13 @@ async def search_flights(
     adults: int = Query(1, ge=1),
     currency: str = Query("CAD", min_length=3, max_length=3),
     max_results: int = Query(10, alias="max", ge=1, le=100),
-    client: httpx.AsyncClient = Depends(get_http_client)
+    client: httpx.AsyncClient = Depends(get_http_client),
+    x_requested_with: str = Header(None)
 ):
     """Search flights using Amadeus API"""
+    if x_requested_with != "XMLHttpRequest":
+        raise HTTPException(status_code=403, detail="Bots not allowed")
+
     start_time = datetime.now()
     
     # Create cache key

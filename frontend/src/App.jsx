@@ -62,7 +62,11 @@ export default function App() {
         adults: String(form.adults),
         max: String(form.max),
       });
-      const res = await fetch(`${BACKEND_URL}/search-flights?${params}`);
+      const res = await fetch(`${BACKEND_URL}/search-flights?${params}`,{
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      });
       if (!res.ok) throw new Error("API error");
       const data = await res.json();
       setResults(data.results || []);
@@ -94,7 +98,11 @@ export default function App() {
         params.append("return_date", form.return_date);
       }
       const res = await fetch(
-        `${BACKEND_URL}/compare-flights-kiwi?${params}`
+        `${BACKEND_URL}/compare-flights-kiwi?${params}`, {
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        }
       );
       if (!res.ok) throw new Error("Kiwi API error");
       const data = await res.json();
