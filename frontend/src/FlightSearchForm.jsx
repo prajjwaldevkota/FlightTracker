@@ -1,291 +1,170 @@
-import React from "react";
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Grid from '@mui/material/Grid';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import InputAdornment from '@mui/material/InputAdornment';
-import { styled } from '@mui/material/styles';
-import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
-import FlightLandIcon from '@mui/icons-material/FlightLand';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import PeopleIcon from '@mui/icons-material/People';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import SearchIcon from '@mui/icons-material/Search';
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
-  '& .MuiOutlinedInput-root': {
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    backdropFilter: 'blur(8px)',
-    transition: 'all 0.3s ease',
-    '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-    },
-    '&.Mui-focused': {
-      backgroundColor: 'rgba(255, 255, 255, 1)',
-      boxShadow: '0 8px 24px rgba(59, 130, 246, 0.15)',
-    },
-  },
-  '& .MuiInputLabel-root': {
-    fontWeight: 600,
-    color: '#374151',
-    '&.Mui-focused': {
-      color: '#3b82f6',
-    },
-  },
-}));
+import { Search, Calendar, Users, MapPin, Plane } from "lucide-react"
 
-const SearchButton = styled(Button)(({ theme }) => ({
-  borderRadius: 12,
-  padding: '12px 32px',
-  fontSize: 16,
-  fontWeight: 700,
-  textTransform: 'none',
-  background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-  boxShadow: '0 8px 24px rgba(59, 130, 246, 0.3)',
-  '&:hover': {
-    background: 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)',
-    boxShadow: '0 12px 32px rgba(59, 130, 246, 0.4)',
-    transform: 'translateY(-2px)',
-  },
-  '&:disabled': {
-    background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
-    transform: 'none',
-  },
-  transition: 'all 0.3s ease',
-}));
-
-export default function FlightSearchForm({ form, handleChange, handleSubmit, loading }) {
+export default function FlightSearchForm({ form, handleChange, handleSubmit, loading, darkMode }) {
   return (
-    <Paper
-      component="form"
-      onSubmit={handleSubmit}
-      elevation={0}
-      sx={{ 
-        p: { xs: 3, sm: 4 }, 
-        mb: 4, 
-        borderRadius: 4,
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.9) 100%)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255,255,255,0.2)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-      }}
-    >
-      <Typography 
-        variant="h5" 
-        sx={{ 
-          mb: 3, 
-          fontWeight: 700,
-          color: '#1e40af',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-        }}
-      >
-        <SearchIcon /> Search Flights
-      </Typography>
-      
-      <Grid container spacing={3}>
-        {/* Origin and Destination */}
-        <Grid item xs={12} md={6}>
-          <StyledTextField
-            label="From (Airport Code)"
-            name="origin"
-            value={form.origin}
-            onChange={handleChange}
-            inputProps={{ maxLength: 3 }}
-            required
-            fullWidth
-            autoComplete="off"
-            placeholder="e.g., YYZ"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <FlightTakeoffIcon sx={{ color: '#3b82f6' }} />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-        
-        <Grid item xs={12} md={6}>
-          <StyledTextField
-            label="To (Airport Code)"
-            name="destination"
-            value={form.destination}
-            onChange={handleChange}
-            inputProps={{ maxLength: 3 }}
-            required
-            fullWidth
-            autoComplete="off"
-            placeholder="e.g., KTM"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <FlightLandIcon sx={{ color: '#10b981' }} />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
+    <div className="space-y-6">
+      {/* Form Header */}
+      <div className="text-center mb-6">
+        <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-full text-sm font-medium mb-2">
+          <Plane className="w-4 h-4" />
+          Search Flights
+        </div>
+      </div>
 
-        {/* Dates */}
-        <Grid item xs={12} md={6}>
-          <StyledTextField
-            label="Departure Date"
-            name="departure_date"
-            type="date"
-            value={form.departure_date}
-            onChange={handleChange}
-            required
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <CalendarTodayIcon sx={{ color: '#f59e0b' }} />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-        
-        <Grid item xs={12} md={6}>
-          <StyledTextField
-            label="Return Date (Optional)"
-            name="return_date"
-            type="date"
-            value={form.return_date}
-            onChange={handleChange}
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <CalendarTodayIcon sx={{ color: '#f59e0b' }} />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Route Selection */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="group">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors">
+              <MapPin className="w-4 h-4 inline mr-1 text-blue-500" />
+              From
+            </label>
+            <input
+              type="text"
+              name="origin"
+              value={form.origin}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
+              placeholder="Airport code (e.g., YYZ)"
+              required
+            />
+          </div>
+          <div className="group">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors">
+              <MapPin className="w-4 h-4 inline mr-1 text-green-500" />
+              To
+            </label>
+            <input
+              type="text"
+              name="destination"
+              value={form.destination}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
+              placeholder="Airport code (e.g., KTM)"
+              required
+            />
+          </div>
+        </div>
 
-        {/* Passengers */}
-        <Grid item xs={12} md={4}>
-          <StyledTextField
-            label="Adults"
-            name="adults"
-            type="number"
-            value={form.adults}
-            onChange={handleChange}
-            inputProps={{ min: 1, max: 9 }}
-            required
-            fullWidth
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PeopleIcon sx={{ color: '#8b5cf6' }} />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-        
-        <Grid item xs={12} md={4}>
-          <StyledTextField
-            label="Children"
-            name="children"
-            type="number"
-            value={form.children}
-            onChange={handleChange}
-            inputProps={{ min: 0, max: 9 }}
-            fullWidth
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PeopleIcon sx={{ color: '#8b5cf6' }} />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-        
-        <Grid item xs={12} md={4}>
-          <StyledTextField
-            label="Infants"
-            name="infants"
-            type="number"
-            value={form.infants}
-            onChange={handleChange}
-            inputProps={{ min: 0, max: 9 }}
-            fullWidth
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PeopleIcon sx={{ color: '#8b5cf6' }} />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
+        {/* Date Selection */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="group">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors">
+              <Calendar className="w-4 h-4 inline mr-1 text-purple-500" />
+              Departure Date
+            </label>
+            <input
+              type="date"
+              name="departure_date"
+              value={form.departure_date}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
+              required
+            />
+          </div>
+          <div className="group">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors">
+              <Calendar className="w-4 h-4 inline mr-1 text-purple-500" />
+              Return Date (Optional)
+            </label>
+            <input
+              type="date"
+              name="return_date"
+              value={form.return_date}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
+            />
+          </div>
+        </div>
 
-        {/* Currency and Max Results */}
-        <Grid item xs={12} md={6}>
-          <StyledTextField
-            label="Currency"
-            name="currency"
-            value={form.currency}
-            onChange={handleChange}
-            inputProps={{ maxLength: 3 }}
-            required
-            fullWidth
-            autoComplete="off"
-            placeholder="e.g., CAD"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <AttachMoneyIcon sx={{ color: '#10b981' }} />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-        
-        <Grid item xs={12} md={6}>
-          <StyledTextField
-            label="Max Results"
-            name="max"
-            type="number"
-            value={form.max}
-            onChange={handleChange}
-            inputProps={{ min: 1, max: 50 }}
-            required
-            fullWidth
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ color: '#6b7280' }} />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-      </Grid>
+        {/* Passengers and Options */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="group">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors">
+              <Users className="w-4 h-4 inline mr-1 text-orange-500" />
+              Adults
+            </label>
+            <input
+              type="number"
+              name="adults"
+              value={form.adults}
+              onChange={handleChange}
+              min="1"
+              max="9"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
+              required
+            />
+          </div>
+          <div className="group">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors">
+              <Users className="w-4 h-4 inline mr-1 text-orange-500" />
+              Children
+            </label>
+            <input
+              type="number"
+              name="children"
+              value={form.children}
+              onChange={handleChange}
+              min="0"
+              max="9"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
+            />
+          </div>
+          <div className="group">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors">
+              <Users className="w-4 h-4 inline mr-1 text-orange-500" />
+              Infants
+            </label>
+            <input
+              type="number"
+              name="infants"
+              value={form.infants}
+              onChange={handleChange}
+              min="0"
+              max="9"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
+            />
+          </div>
+          <div className="group">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors">
+              Currency
+            </label>
+            <select
+              name="currency"
+              value={form.currency}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
+            >
+              <option value="CAD">CAD</option>
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+            </select>
+          </div>
+        </div>
 
-      <Box mt={4} display="flex" justifyContent="center">
-        <SearchButton
-          type="submit"
-          variant="contained"
-          size="large"
-          disabled={loading}
-          startIcon={<SearchIcon />}
-          sx={{ minWidth: 200 }}
-        >
-          {loading ? "Searching..." : "Search Flights"}
-        </SearchButton>
-      </Box>
-    </Paper>
-  );
+        {/* Search Button */}
+        <div className="pt-4">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-medium py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                Searching...
+              </>
+            ) : (
+              <>
+                <Search className="w-5 h-5" />
+                Search Flights
+              </>
+            )}
+          </button>
+        </div>
+      </form>
+    </div>
+  )
 }

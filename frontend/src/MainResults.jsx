@@ -1,312 +1,219 @@
-import React from "react";
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
-import Grid from '@mui/material/Grid';
-import Chip from '@mui/material/Chip';
-import Divider from '@mui/material/Divider';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from '@mui/material/styles';
-import { styled } from '@mui/material/styles';
-import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
-import FlightLandIcon from '@mui/icons-material/FlightLand';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import LaunchIcon from '@mui/icons-material/Launch';
-import { AirportIcon, CalendarIcon } from "./Icons";
-
-const ResultCard = styled(Card)(({ theme }) => ({
-  borderRadius: 16,
-  overflow: 'hidden',
-  background: 'linear-gradient(145deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%)',
-  backdropFilter: 'blur(16px)',
-  border: '1px solid rgba(255,255,255,0.2)',
-  boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-  transition: 'all 0.3s ease',
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100%',
-  '&:hover': {
-    boxShadow: '0 16px 48px rgba(0,0,0,0.12)',
-    transform: 'translateY(-4px)',
-  },
-}));
-
-const PriceHeader = styled(Box)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
-  color: 'white',
-  padding: theme.spacing(2.5, 3),
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  position: 'relative',
-  '&::after': {
-    content: '""',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 4,
-    background: 'linear-gradient(90deg, #06b6d4 0%, #10b981 100%)',
-  },
-}));
-
-const SegmentBox = styled(Box)(({ theme }) => ({
-  backgroundColor: 'rgba(255,255,255,0.9)',
-  borderRadius: 12,
-  padding: theme.spacing(2),
-  margin: theme.spacing(1, 0),
-  border: '1px solid rgba(59,130,246,0.1)',
-  transition: 'all 0.2s ease',
-  '&:hover': {
-    backgroundColor: 'rgba(255,255,255,1)',
-    boxShadow: '0 4px 12px rgba(59,130,246,0.1)',
-    transform: 'translateY(-1px)',
-  },
-}));
-
-const BookButton = styled(Button)(({ theme }) => ({
-  borderRadius: 12,
-  padding: '14px 28px',
-  fontSize: 16,
-  fontWeight: 700,
-  textTransform: 'none',
-  background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-  boxShadow: '0 8px 24px rgba(59, 130, 246, 0.3)',
-  '&:hover': {
-    background: 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)',
-    boxShadow: '0 12px 32px rgba(59, 130, 246, 0.4)',
-    transform: 'translateY(-2px)',
-  },
-  transition: 'all 0.3s ease',
-}));
+import { Plane, Clock, ExternalLink, PlaneTakeoff, PlaneLanding } from "lucide-react"
+import { CalendarIcon } from "./Icons"
 
 // Helper function to format flight duration
 const formatDuration = (segment) => {
   if (segment.duration) {
-    
-    const match = segment.duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+    const match = segment.duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/)
     if (match) {
-      const hours = parseInt(match[1] || 0);
-      const minutes = parseInt(match[2] || 0);
+      const hours = Number.parseInt(match[1] || "0")
+      const minutes = Number.parseInt(match[2] || "0")
       if (hours > 0) {
-        return `${hours}h ${minutes}m`;
+        return `${hours}h ${minutes}m`
       }
-      return `${minutes}m`;
+      return `${minutes}m`
     }
   }
-  
-};
+  return "N/A"
+}
 
-export default function MainResults({ results, form }) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
-  if (!results || results.length === 0) return null;
+
+export default function MainResults({ results, form, darkMode = false }) {
+  if (!results || results.length === 0) return null
 
   return (
-    <Box 
-      width="100%" 
-      maxWidth={{ xs: '100%', sm: '100%', md: 1200, lg: 1400 }} 
-      sx={{ 
-        mb: 4,
-        mx: 'auto', // Center the container
-        px: { xs: 2, sm: 3 } // Add padding for mobile
-      }}
-    >
-      <Box 
-        mb={4} 
-        sx={{ 
-          background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
-          borderRadius: 3,
-          p: 3,
-          color: 'white',
-          boxShadow: 3
-        }}
-      >
-        <Typography variant="h4" fontWeight={700} mb={1}>
-          <FlightTakeoffIcon sx={{ fontSize: 32, mr: 1 }} />
-          Search Results ({results.length})
-        </Typography> 
-        <Typography variant="body2" sx={{ opacity: 0.9 }}>
-          Found {results.length} flight options for your trip
-        </Typography>
-      </Box>
-      
-      <Grid 
-        container 
-        spacing={3}
-        sx={{
-          justifyContent: 'center',
-        }}
-      >
+    <div className="w-full mb-12 px-4 sm:px-6 lg:px-8">
+      {/* Header Section */}
+      <div className="mb-8 text-center">
+        <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-full text-sm font-medium mb-4">
+          <Plane className="w-4 h-4" />
+          Flight Results
+        </div>
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">Available Flights</h2>
+        <p className="text-gray-600 dark:text-gray-300">
+          Found {results.length} available flight{results.length !== 1 ? "s" : ""} for your journey
+        </p>
+      </div>
+
+      {/* Results Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
         {results.map((flight) => {
-          const firstItinerary = flight.itineraries[0];
-          const firstSegment = firstItinerary.segments[0];
-          const lastSegment = firstItinerary.segments[firstItinerary.segments.length - 1];
-          
+          const firstItinerary = flight.itineraries[0]
+          const firstSegment = firstItinerary.segments[0]
+          const lastSegment = firstItinerary.segments[firstItinerary.segments.length - 1]
+
           // Build Skyscanner URL
-          const origin = firstSegment.departure.iataCode.toLowerCase();
-          const destination = lastSegment.arrival.iataCode.toLowerCase();
-          const departDate = form.departure_date.replace(/-/g, "").slice(2);
-          const returnDate = form.return_date ? form.return_date.replace(/-/g, "").slice(2) : "";
-          const adults = form.adults;
-          
-          let skyscannerUrl = `https://www.skyscanner.com/transport/flights/${origin}/${destination}/${departDate}/`;
-          if (returnDate) skyscannerUrl += `${returnDate}/`;
-          skyscannerUrl += `?adults=${adults}`;
+          const origin = firstSegment.departure.iataCode.toLowerCase()
+          const destination = lastSegment.arrival.iataCode.toLowerCase()
+          const departDate = form.departure_date.replace(/-/g, "").slice(2)
+          const returnDate = form.return_date ? form.return_date.replace(/-/g, "").slice(2) : ""
+          const adults = form.adults
+
+          let skyscannerUrl = `https://www.skyscanner.com/transport/flights/${origin}/${destination}/${departDate}/`
+          if (returnDate) skyscannerUrl += `${returnDate}/`
+          skyscannerUrl += `?adults=${adults}`
 
           return (
-            <Grid 
-              item 
-              xs={12} 
-              sm={6} 
-              md={6} 
-              lg={4} // Allow 3 columns on large screens
-              xl={4}
+            <div
               key={flight.id}
-              sx={{
-                display: 'flex',
-                justifyContent: 'center' // Center each card
-              }}
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300 overflow-hidden group hover:-translate-y-1"
             >
-              <ResultCard sx={{ width: '100%', maxWidth: 400 }}>
-                <PriceHeader>
-                  <Typography variant="h5" fontWeight={800}>
-                    {flight.price} {flight.currency}
-                  </Typography>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    {flight.validatingAirlineCodes?.map(code => (
-                      <Chip 
-                        key={code} 
-                        label={code} 
-                        size="small" 
-                        sx={{ 
-                          bgcolor: 'rgba(255,255,255,0.2)', 
-                          color: 'white', 
-                          fontWeight: 700,
-                          border: '1px solid rgba(255,255,255,0.3)',
-                        }} 
-                      />
-                    ))}
-                  </Stack>
-                </PriceHeader>
-                
-                <CardContent sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Box sx={{ flexGrow: 1 }}>
-                    {flight.itineraries.map((itinerary, idx) => (
-                      <Box key={idx} mb={3}>
-                        <Typography 
-                          variant="h6" 
-                          fontWeight={700} 
-                          color="#1e40af" 
-                          mb={2}
-                          sx={{ 
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1,
-                            borderBottom: '2px solid #e2e8f0',
-                            paddingBottom: 1
-                          }}
+              {/* Price Header */}
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-b border-gray-200 dark:border-gray-600 p-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {flight.price}{" "}
+                      <span className="text-lg font-normal text-gray-600 dark:text-gray-400">{flight.currency}</span>
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      {flight.validatingAirlineCodes?.map((code) => (
+                        <span
+                          key={code}
+                          className="inline-block bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 text-xs font-medium px-2 py-1 rounded-full"
                         >
-                          {idx === 0 ? <FlightTakeoffIcon /> : <FlightLandIcon />}
-                          {idx === 0 ? '🛫 Outbound' : '🛬 Return'} Journey
-                        </Typography>
-                        
-                        <Stack spacing={1}>
-                          {itinerary.segments.map((segment, sidx) => (
-                            <SegmentBox key={sidx}>
-                              <Grid container alignItems="center" spacing={2}>
-                                <Grid item xs={12} sm={6}>
-                                  <Box display="flex" alignItems="center" gap={1.5}>
-                                    <AirportIcon />
-                                    <Typography fontWeight={700} sx={{ color: '#1e40af', fontSize: 16 }}>
-                                      {segment.departure.iataCode}
-                                    </Typography>
-                                    <Typography color="text.disabled" sx={{ fontSize: 18 }}>→</Typography>
-                                    <Typography fontWeight={700} sx={{ color: '#10b981', fontSize: 16 }}>
-                                      {segment.arrival.iataCode}
-                                    </Typography>
-                                  </Box>
-                                </Grid>
-                                
-                                <Grid item xs={12} sm={6}>
-                                  <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
-                                    <CalendarIcon />
-                                    <Typography variant="body2" sx={{ color: '#374151', fontWeight: 500 }}>
-                                      {segment.departure.at.slice(0, 10)}
-                                    </Typography>
-                                    <AccessTimeIcon sx={{ fontSize: 16, color: '#6b7280' }} />
-                                    <Typography variant="body2" sx={{ color: '#374151', fontWeight: 500 }}>
-                                      {segment.departure.at.slice(11, 16)} → {segment.arrival.at.slice(11, 16)}
-                                    </Typography>
-                                  </Box>
-                                </Grid>
-                                
-                                <Grid item xs={12}>
-                                  <Divider sx={{ my: 1 }} />
-                                  <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
-                                    <Chip 
-                                      label={`${segment.carrierCode}${segment.number}`}
-                                      size="small"
-                                      sx={{
-                                        backgroundColor: '#3b82f6',
-                                        color: 'white',
-                                        fontWeight: 600,
-                                        fontSize: '0.75rem'
-                                      }}
-                                    />
-                                    <Chip 
-                                      label={formatDuration(segment)}
-                                      size="small"
-                                      sx={{
-                                        backgroundColor: '#10b981',
-                                        color: 'white',
-                                        fontWeight: 600,
-                                        fontSize: '0.75rem'
-                                      }}
-                                    />
-                                  </Stack>
-                                </Grid>
-                              </Grid>
-                            </SegmentBox>
-                          ))}
-                        </Stack>
-                      </Box>
-                    ))}
-                  </Box>
-                  
-                  <Box mt={2}>
-                    <BookButton
-                      href={skyscannerUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      variant="contained"
-                      fullWidth
-                      startIcon={<LaunchIcon />}
-                    >
-                      Book on Skyscanner →
-                    </BookButton>
-                    
-                    <Typography 
-                      variant="caption" 
-                      color="text.secondary" 
-                      display="block" 
-                      mt={1.5} 
-                      align="center"
-                      sx={{ fontSize: 12, lineHeight: 1.4, opacity: 0.8 }}
-                    >
-                      Prices may vary. You'll be redirected to Skyscanner to complete your booking.
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </ResultCard>
-            </Grid>
-          );
+                          {code}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {flight.itineraries.map((itinerary , idx) => (
+                  <div key={idx} className={idx > 0 ? "border-t border-gray-100 dark:border-gray-700 pt-6" : ""}>
+                    {/* Journey Header */}
+                    <div className="flex items-center gap-2 mb-4">
+                      <div
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                          idx === 0 ? "bg-blue-100 dark:bg-blue-900/50" : "bg-green-100 dark:bg-green-900/50"
+                        }`}
+                      >
+                        {idx === 0 ? (
+                          <PlaneTakeoff className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        ) : (
+                          <PlaneLanding className="w-4 h-4 text-green-600 dark:text-green-400" />
+                        )}
+                      </div>
+                      <h3
+                        className={`font-semibold ${
+                          idx === 0 ? "text-blue-600 dark:text-blue-400" : "text-green-600 dark:text-green-400"
+                        }`}
+                      >
+                        {idx === 0 ? "Outbound Flight" : "Return Flight"}
+                      </h3>
+                    </div>
+
+                    {/* Route Overview */}
+                    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-4">
+                      <div className="flex items-center justify-between">
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                            {firstSegment.departure.iataCode}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            {firstSegment.departure.at.slice(11, 16)}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500">
+                          <div className="w-8 h-px bg-gray-300 dark:bg-gray-600"></div>
+                          <Plane className="w-4 h-4" />
+                          <div className="w-8 h-px bg-gray-300 dark:bg-gray-600"></div>
+                        </div>
+
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-green-600 dark:text-green-400">
+                            {lastSegment.arrival.iataCode}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            {lastSegment.arrival.at.slice(11, 16)}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="text-center mt-2">
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                          {itinerary.segments.length > 1
+                            ? `${itinerary.segments.length - 1} stop${itinerary.segments.length > 2 ? "s" : ""}`
+                            : "Direct"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Flight Segments */}
+                    <div className="space-y-3">
+                      {itinerary.segments.map((segment , sidx) => (
+                        <div
+                          key={sidx}
+                          className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-gray-50/50 dark:bg-gray-700/30 hover:bg-white dark:hover:bg-gray-700/50 transition-colors duration-200"
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-2 text-lg font-semibold">
+                                <span className="text-blue-600 dark:text-blue-400">{segment.departure.iataCode}</span>
+                                <div className="flex items-center text-gray-400 dark:text-gray-500">
+                                  <div className="w-6 h-px bg-gray-300 dark:bg-gray-600"></div>
+                                  <Plane className="w-4 h-4 mx-1" />
+                                  <div className="w-6 h-px bg-gray-300 dark:bg-gray-600"></div>
+                                </div>
+                                <span className="text-green-600 dark:text-green-400">{segment.arrival.iataCode}</span>
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                              {segment.carrierCode} {segment.number}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-1">
+                                <CalendarIcon />
+                                <span>
+                                  {new Date(segment.departure.at).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                  })}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                <span>
+                                  {segment.departure.at.slice(11, 16)} → {segment.arrival.at.slice(11, 16)}
+                                </span>
+                              </div>
+                            </div>
+                            <span className="text-xs bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">
+                              {formatDuration(segment)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Book Button */}
+                <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
+                  <a
+                    href={skyscannerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 group shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                  >
+                    Book on Skyscanner
+                    <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  </a>
+                  <p className="text-center text-gray-500 dark:text-gray-400 text-xs mt-2">
+                    Prices may vary on Skyscanner. You'll be redirected to complete your booking.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )
         })}
-      </Grid>
-    </Box>
-  );
+      </div>
+    </div>
+  )
 }

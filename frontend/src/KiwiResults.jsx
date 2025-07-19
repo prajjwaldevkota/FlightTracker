@@ -1,410 +1,253 @@
-import React from "react";
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Stack,
-  Grid,
-  Chip,
-  Divider,
-  Tooltip,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
-import { AirportIcon, CalendarIcon } from "./Icons";
+import { Plane, PlaneTakeoff, PlaneLanding, Clock, AlertTriangle, ExternalLink } from "lucide-react"
+import { CalendarIcon } from "./Icons"
 
-export default function KiwiResults({ kiwiResults }) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+const TravelHackChips = {
+  virtualInterlining: {
+    icon: "⚠️",
+    label: "Self-Transfer",
+    color:
+      "bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+    description: "You need to collect and recheck your baggage",
+  },
+  hiddenCity: {
+    icon: "🎯",
+    label: "Hidden City",
+    color: "bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800",
+    description: "Ticket manipulation - use with caution",
+  },
+  throwaway: {
+    icon: "🎫",
+    label: "Throwaway",
+    color:
+      "bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-800",
+    description: "Not using all segments of the ticket",
+  },
+}
 
-  if (
-    !kiwiResults ||
-    !kiwiResults.itineraries ||
-    kiwiResults.itineraries.length === 0
-  )
-    return null;
+
+export default function KiwiResults({ kiwiResults, darkMode = false }) {
+  if (!kiwiResults || !kiwiResults.itineraries || kiwiResults.itineraries.length === 0) return null
+
+  const renderSegments = (segments) => {
+    return segments.map((segObj, sidx) => {
+      const seg = segObj.segment
+      return (
+        <div
+          key={sidx}
+          className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-gray-50/50 dark:bg-gray-700/30 hover:bg-white dark:hover:bg-gray-700/50 transition-colors duration-200"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-lg font-semibold">
+                <span className="text-blue-600 dark:text-blue-400">{seg?.source?.station?.code}</span>
+                <div className="flex items-center text-gray-400 dark:text-gray-500">
+                  <div className="w-6 h-px bg-gray-300 dark:bg-gray-600"></div>
+                  <Plane className="w-4 h-4 mx-1" />
+                  <div className="w-6 h-px bg-gray-300 dark:bg-gray-600"></div>
+                </div>
+                <span className="text-green-600 dark:text-green-400">{seg?.destination?.station?.code}</span>
+              </div>
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+              {seg?.carrier?.code} {seg?.code}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1">
+                <CalendarIcon />
+                <span>
+                  {seg?.source?.localTime
+                    ? new Date(seg.source.localTime).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })
+                    : "N/A"}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock className="w-4 h-4" />
+                <span>
+                  {seg?.source?.localTime?.slice(11, 16)} → {seg?.destination?.localTime?.slice(11, 16)}
+                </span>
+              </div>
+            </div>
+            {segObj.layover && (
+              <span className="text-xs bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 px-2 py-1 rounded-full">
+                {Math.round(segObj.layover.duration / 3600)}h layover
+              </span>
+            )}
+          </div>
+        </div>
+      )
+    })
+  }
 
   return (
-    <Box
-      width="100%"
-      maxWidth={{ xs: "100%", sm: "100%", md: 1200, lg: 1400 }}
-      sx={{
-        mb: 4,
-        mx: "auto", // Center the container
-        px: { xs: 2, sm: 3 }, // Add padding for mobile
-      }}
-    >
-      <Box
-        mb={4}
-        sx={{
-          background: "linear-gradient(135deg, #2563eb 0%, #1e40af 100%)",
-          borderRadius: 3,
-          p: 3,
-          color: "white",
-          boxShadow: 3,
-        }}
-      >
-        <Typography variant="h4" fontWeight={700} mb={1}>
-          Compare Price with Kiwi.com
-        </Typography>
+    <div className="w-full mb-12 px-4 sm:px-6 lg:px-8">
+      {/* Header Section */}
+      <div className="mb-8 text-center">
+        <div className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-4 py-2 rounded-full text-sm font-medium mb-4">
+          <Plane className="w-4 h-4" />
+          Alternative Options
+        </div>
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">Compare with Kiwi.com</h2>
         {kiwiResults.metadata && (
-          <Box color="rgba(255,255,255,0.9)" fontSize="small">
-            <Typography variant="body2">
-              Found {kiwiResults.metadata.itinerariesCount} flights
-              {kiwiResults.metadata.hasMorePending && " (more loading...)"}
-            </Typography>
-          </Box>
+          <p className="text-gray-600 dark:text-gray-300">
+            Found {kiwiResults.metadata.itinerariesCount} alternative flight
+            {kiwiResults.metadata.itinerariesCount !== 1 ? "s" : ""}
+            {kiwiResults.metadata.hasMorePending && " (loading more...)"}
+          </p>
         )}
-      </Box>
+      </div>
 
-      <Grid
-        container
-        spacing={3}
-        sx={{
-          overflowX: isMobile ? "auto" : "visible",
-          pb: isMobile ? 2 : 0,
-          justifyContent: 'center',
-        }}
-      >
+      {/* Results Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 max-w-7xl mx-auto">
         {kiwiResults.itineraries.map((itinerary, idx) => {
-          const bookingUrl = itinerary.bookingOptions?.edges?.[0]?.node
-            ?.bookingUrl
+          const bookingUrl = itinerary.bookingOptions?.edges?.[0]?.node?.bookingUrl
             ? `https://www.kiwi.com${itinerary.bookingOptions.edges[0].node.bookingUrl}`
-            : null;
-
-          function renderSegments(segments) {
-            return segments.map((segObj, sidx) => {
-              const seg = segObj.segment;
-              return (
-                <Box
-                  key={sidx}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1.5,
-                    p: 2,
-                    backgroundColor: "#f8fafc",
-                    borderRadius: 2,
-                    border: "1px solid #e2e8f0",
-                    mb: 1,
-                    flexWrap: "wrap",
-                    "&:hover": {
-                      backgroundColor: "#f1f5f9",
-                      transform: "translateY(-1px)",
-                      transition: "all 0.2s ease",
-                    },
-                  }}
-                >
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <AirportIcon />
-                    <Tooltip title={seg?.source?.station?.code} arrow>
-                      <Typography
-                        component="span"
-                        fontWeight={700}
-                        sx={{
-                          fontSize: { xs: 14, sm: 16 },
-                          color: "#1e293b",
-                        }}
-                      >
-                        {seg?.source?.station?.code}
-                      </Typography>
-                    </Tooltip>
-                    <Typography
-                      component="span"
-                      color="#64748b"
-                      sx={{ fontSize: { xs: 14, sm: 16 }, mx: 1 }}
-                    >
-                      →
-                    </Typography>
-                    <Tooltip title={seg?.destination?.station?.code} arrow>
-                      <Typography
-                        component="span"
-                        fontWeight={700}
-                        sx={{
-                          fontSize: { xs: 14, sm: 16 },
-                          color: "#1e293b",
-                        }}
-                      >
-                        {seg?.destination?.station?.code}
-                      </Typography>
-                    </Tooltip>
-                  </Box>
-
-                  <Divider
-                    orientation="vertical"
-                    flexItem
-                    sx={{ borderColor: "#cbd5e1" }}
-                  />
-
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <CalendarIcon />
-                    <Tooltip title={seg?.source?.localTime} arrow>
-                      <Typography
-                        component="span"
-                        sx={{
-                          fontSize: { xs: 12, sm: 14 },
-                          color: "#475569",
-                        }}
-                      >
-                        {seg?.source?.localTime?.slice(0, 10)}{" "}
-                        {seg?.source?.localTime?.slice(11, 16)}
-                      </Typography>
-                    </Tooltip>
-                    <Typography
-                      component="span"
-                      color="#64748b"
-                      sx={{ fontSize: { xs: 12, sm: 14 }, mx: 1 }}
-                    >
-                      →
-                    </Typography>
-                    <Tooltip title={seg?.destination?.localTime} arrow>
-                      <Typography
-                        component="span"
-                        sx={{
-                          fontSize: { xs: 12, sm: 14 },
-                          color: "#475569",
-                        }}
-                      >
-                        {seg?.destination?.localTime?.slice(0, 10)}{" "}
-                        {seg?.destination?.localTime?.slice(11, 16)}
-                      </Typography>
-                    </Tooltip>
-                  </Box>
-
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <Chip
-                      label={`${seg?.carrier?.code}${seg?.code}`}
-                      size="small"
-                      sx={{
-                        backgroundColor: "#3b82f6",
-                        color: "white",
-                        fontWeight: 600,
-                        fontSize: "0.75rem",
-                      }}
-                    />
-                    {segObj.layover && (
-                      <Chip
-                        label={`${Math.round(
-                          segObj.layover.duration / 3600
-                        )}h layover`}
-                        size="small"
-                        sx={{
-                          backgroundColor: "#f59e0b",
-                          color: "white",
-                          fontWeight: 600,
-                          fontSize: "0.75rem",
-                        }}
-                      />
-                    )}
-                  </Box>
-                </Box>
-              );
-            });
-          }
+            : null
 
           return (
-            <Grid
-              item
-              xs={12}
-              sm={6}
-              md={6}
-              lg={6}
+            <div
               key={idx}
-              sx={{
-                minWidth: isMobile ? 320 : "unset",
-                display: "flex",
-              }}
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300 overflow-hidden group hover:-translate-y-1"
             >
-              <Card
-                sx={{
-                  borderRadius: 3,
-                  boxShadow: 2,
-                  "&:hover": {
-                    boxShadow: 4,
-                    transform: "translateY(-2px)",
-                  },
-                  overflow: "hidden",
-                  background: "white",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  transition: "all 0.3s ease",
-                  display: "flex",
-                  flexDirection: "column",
-                  height: "100%",
-                  width: "100%",
-                }}
-              >
-                <Box
-                  sx={{
-                    background:
-                      "linear-gradient(90deg, #059669 0%, #047857 100%)",
-                    p: 2,
-                    color: "white",
-                  }}
-                >
-                  <Grid
-                    container
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Grid item>
-                      <Typography variant="h5" fontWeight={800}>
-                        {itinerary.price?.amount} CAD
-                      </Typography>
-                    </Grid>
-                    <Grid item>
-                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        {itinerary.provider?.name || "Kiwi.com"}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                  <Typography variant="caption" sx={{ opacity: 0.8 }}>
-                    {itinerary.lastAvailable &&
-                    itinerary.lastAvailable.seatsLeft != null
-                      ? `${itinerary.lastAvailable.seatsLeft} seats left`
-                      : "Seats availability unknown"}
-                  </Typography>
-                </Box>
+              {/* Price Header */}
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-b border-gray-200 dark:border-gray-600 p-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {itinerary.price?.amount}{" "}
+                      <span className="text-lg font-normal text-gray-600 dark:text-gray-400">CAD</span>
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      via {itinerary.provider?.name || "Kiwi.com"}
+                    </div>
+                  </div>
+                  {itinerary.lastAvailable && itinerary.lastAvailable.seatsLeft != null && (
+                    <div className="text-right">
+                      <div className="text-xs bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 px-2 py-1 rounded-full">
+                        {itinerary.lastAvailable.seatsLeft} seats left
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
 
-                <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                  {itinerary.travelHack && (
-                    <Box mb={2} display="flex" flexWrap="wrap" gap={1}>
-                      {itinerary.travelHack.isVirtualInterlining && (
-                        <Chip
-                          label="⚠️ Self-transfer Required"
-                          sx={{
-                            backgroundColor: "#fbbf24",
-                            color: "white",
-                            fontWeight: 600,
-                          }}
-                          size="small"
-                        />
+              <div className="p-6 space-y-6">
+                {/* Travel Hack Warnings */}
+                {itinerary.travelHack.isVirtualInterlining && (
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                      <span className="font-medium text-amber-800 dark:text-amber-300 text-sm">Special Conditions</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {itinerary.travelHack && (
+                        <div className="group relative">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border cursor-help ${TravelHackChips.virtualInterlining.color}`}
+                          >
+                            <span>{TravelHackChips.virtualInterlining.icon}</span>
+                            {TravelHackChips.virtualInterlining.label}
+                          </span>
+                          <div className="absolute bottom-full left-30 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white dark:text-gray-200 text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                            {TravelHackChips.virtualInterlining.description}
+                          </div>
+                        </div>
                       )}
                       {itinerary.travelHack.isTrueHiddenCity && (
-                        <Chip
-                          label="🎯 Hidden City"
-                          sx={{
-                            backgroundColor: "#ef4444",
-                            color: "white",
-                            fontWeight: 600,
-                          }}
-                          size="small"
-                        />
+                        <div className="group relative">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border cursor-help ${TravelHackChips.hiddenCity.color}`}
+                          >
+                            <span>{TravelHackChips.hiddenCity.icon}</span>
+                            {TravelHackChips.hiddenCity.label}
+                          </span>
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white dark:text-gray-200 text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                            {TravelHackChips.hiddenCity.description}
+                          </div>
+                        </div>
                       )}
                       {itinerary.travelHack.isThrowawayTicket && (
-                        <Chip
-                          label="🎫 Throwaway"
-                          sx={{
-                            backgroundColor: "#6366f1",
-                            color: "white",
-                            fontWeight: 600,
-                          }}
-                          size="small"
-                        />
-                      )}
-                    </Box>
-                  )}
-
-                  <Box mb={2}>
-                    <Typography
-                      fontWeight={700}
-                      color="#1e293b"
-                      variant="h6"
-                      mb={2}
-                      sx={{
-                        borderBottom: "2px solid #e2e8f0",
-                        paddingBottom: 1,
-                      }}
-                    >
-                      Flight Details
-                    </Typography>
-
-                    {itinerary.sector && itinerary.sector.sectorSegments && (
-                      <Box mb={2}>
-                        <Typography
-                          component="span"
-                          fontWeight={600}
-                          color="#374151"
-                          mb={1}
-                          display="block"
-                        >
-                          ✈️ Flight Segments
-                        </Typography>
-                        {renderSegments(itinerary.sector.sectorSegments)}
-                      </Box>
-                    )}
-
-                    {itinerary.outbound &&
-                      itinerary.outbound.sectorSegments && (
-                        <Box mb={2}>
-                          <Typography
-                            component="span"
-                            fontWeight={600}
-                            color="#374151"
-                            mb={1}
-                            display="block"
+                        <div className="group relative">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border cursor-help ${TravelHackChips.throwaway.color}`}
                           >
-                            🛫 Outbound
-                          </Typography>
-                          {renderSegments(itinerary.outbound.sectorSegments)}
-                        </Box>
+                            <span>{TravelHackChips.throwaway.icon}</span>
+                            {TravelHackChips.throwaway.label}
+                          </span>
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white dark:text-gray-200 text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                            {TravelHackChips.throwaway.description}
+                          </div>
+                        </div>
                       )}
+                    </div>
+                  </div>
+                )}
 
-                    {itinerary.inbound && itinerary.inbound.sectorSegments && (
-                      <Box mb={2}>
-                        <Typography
-                          component="span"
-                          fontWeight={600}
-                          color="#374151"
-                          mb={1}
-                          display="block"
-                        >
-                          🛬 Return
-                        </Typography>
-                        {renderSegments(itinerary.inbound.sectorSegments)}
-                      </Box>
-                    )}
-                  </Box>
-                </CardContent>
+                {/* Flight Segments */}
+                {itinerary.sector && itinerary.sector.sectorSegments && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <PlaneTakeoff className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Flight Details</h3>
+                    </div>
+                    <div className="space-y-3">{renderSegments(itinerary.sector.sectorSegments)}</div>
+                  </div>
+                )}
 
-                {bookingUrl && (
-                  <Box sx={{ p: 3, pt: 0 }}>
-                    <Button
+                {itinerary.outbound && itinerary.outbound.sectorSegments && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <PlaneTakeoff className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Outbound</h3>
+                    </div>
+                    <div className="space-y-3">{renderSegments(itinerary.outbound.sectorSegments)}</div>
+                  </div>
+                )}
+
+                {itinerary.inbound && itinerary.inbound.sectorSegments && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <PlaneLanding className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Return</h3>
+                    </div>
+                    <div className="space-y-3">{renderSegments(itinerary.inbound.sectorSegments)}</div>
+                  </div>
+                )}
+
+                {/* Book Button */}
+                <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
+                  {bookingUrl ? (
+                    <a
                       href={bookingUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      variant="contained"
-                      sx={{
-                        fontWeight: 700,
-                        width: "100%",
-                        background:
-                          "linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%)",
-                        color: "white",
-                        py: 1.5,
-                        fontSize: "1rem",
-                        textTransform: "none",
-                        borderRadius: 2,
-                        boxShadow: "0 4px 15px rgba(59, 130, 246, 0.3)",
-                        "&:hover": {
-                          background:
-                            "linear-gradient(90deg, #2563eb 0%, #1e40af 100%)",
-                          boxShadow: "0 6px 20px rgba(59, 130, 246, 0.4)",
-                          transform: "translateY(-1px)",
-                        },
-                      }}
-                      fullWidth
+                      className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 group shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                     >
-                      Book Flight →
-                    </Button>
-                  </Box>
-                )}
-              </Card>
-            </Grid>
-          );
+                      Book on Kiwi.com
+                      <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                    </a>
+                  ) : (
+                    <button
+                      disabled
+                      className="w-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-medium py-3 px-4 rounded-lg cursor-not-allowed"
+                    >
+                      Booking Unavailable
+                    </button>
+                  )}
+                  <p className="text-center text-gray-500 dark:text-gray-400 text-xs mt-2">
+                    Alternative booking through Kiwi.com
+                  </p>
+                </div>
+              </div>
+            </div>
+          )
         })}
-      </Grid>
-    </Box>
-  );
+      </div>
+    </div>
+  )
 }
