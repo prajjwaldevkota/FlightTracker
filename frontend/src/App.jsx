@@ -20,7 +20,7 @@ export default function App() {
     adults: 1,
     children: 0,
     infants: 0,
-    currency: "CAD",
+    currency: "",
     max: 10,
   });
 

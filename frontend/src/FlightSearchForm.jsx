@@ -11,6 +11,7 @@ const currencyList = [
   { code: "JPY", name: "Japanese Yen" },
   { code: "SGD", name: "Singapore Dollar" },
   { code: "HKD", name: "Hong Kong Dollar" },
+  { code: "INR", name: "Indian Rupee" },
   { code: "KRW", name: "South Korean Won" },
 ];
 
