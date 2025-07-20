@@ -131,11 +131,24 @@ export default function App() {
           <div className="absolute top-3/4 -right-20 w-80 h-80 bg-orange-300/15 dark:bg-orange-500/8 rounded-full blur-3xl animate-pulse delay-1000"></div>
           <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-yellow-300/12 dark:bg-yellow-500/6 rounded-full blur-3xl animate-pulse delay-500"></div>
         </div>
-
+  
         <div className="max-w-6xl mx-auto relative z-10">
           {/* Header */}
-          <div className="flex justify-between items-center mb-12">
-            <div className="text-center flex-1">
+          <div className="mb-12">
+            {/* Dark Mode Toggle - Absolute positioned on mobile, normal flex on desktop */}
+            <button
+              onClick={toggleDarkMode}
+              className="absolute top-4 left-[-10] md:static md:float-right md:mb-4 p-3 md:p-4 rounded-xl md:rounded-2xl bg-white/30 dark:bg-neutral-700/40 backdrop-blur-2xl border border-white/50 dark:border-neutral-600/50 hover:bg-white/40 dark:hover:bg-neutral-600/50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 z-30"
+            >
+              {darkMode ? (
+                <Sun className="w-5 h-5 md:w-6 md:h-6 text-amber-400" />
+              ) : (
+                <Moon className="w-5 h-5 md:w-6 md:h-6 text-gray-700" />
+              )}
+            </button>
+
+            {/* Main Header Content - Centered */}
+            <div className="text-center">
               <div className="relative inline-block mb-6">
                 <div className="bg-white/25 dark:bg-neutral-800/30 backdrop-blur-2xl rounded-3xl p-4 shadow-2xl border border-white/40 dark:border-neutral-600/40">
                   <div className="flex items-center gap-4 justify-center">
@@ -150,22 +163,10 @@ export default function App() {
                   </div>
                 </div>
               </div>
-              <p className="text-gray-600 dark:text-neutral-300 text-lg max-w-2xl mx-auto font-medium">
+              <p className="text-gray-600 dark:text-neutral-300 text-lg max-w-2xl mx-auto font-medium px-4">
                 Discover the best flight deals with our app.
               </p>
             </div>
-
-            {/* Dark Mode Toggle */}
-            <button
-              onClick={toggleDarkMode}
-              className="p-4 rounded-2xl bg-white/30 dark:bg-neutral-700/40 backdrop-blur-2xl border border-white/50 dark:border-neutral-600/50 hover:bg-white/40 dark:hover:bg-neutral-600/50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105"
-            >
-              {darkMode ? (
-                <Sun className="w-6 h-6 text-amber-400" />
-              ) : (
-                <Moon className="w-6 h-6 text-gray-700" />
-              )}
-            </button>
           </div>
 
           {/* Main Content Card */}

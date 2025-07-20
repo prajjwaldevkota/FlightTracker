@@ -1,7 +1,62 @@
 
 import { Search, Calendar, Users, MapPin, Plane } from "lucide-react"
+import { useState, useRef } from "react";
+import airports from "./assets/airports.json";
 
 export default function FlightSearchForm({ form, handleChange, handleSubmit, loading, darkMode }) {
+  // Autocomplete state for origin
+  const [originInput, setOriginInput] = useState("");
+  const [originSuggestions, setOriginSuggestions] = useState([]);
+  const [showOriginSuggestions, setShowOriginSuggestions] = useState(false);
+  const originRef = useRef(null);
+
+  // Autocomplete state for destination
+  const [destInput, setDestInput] = useState("");
+  const [destSuggestions, setDestSuggestions] = useState([]);
+  const [showDestSuggestions, setShowDestSuggestions] = useState(false);
+  const destRef = useRef(null);
+
+  // Helper to filter airports
+  const filterAirports = (input) => {
+    if (!input) return [];
+    const lower = input.toLowerCase();
+    return airports.filter(a =>
+      (a.city && a.city.toLowerCase().includes(lower)) ||
+      (a.name && a.name.toLowerCase().includes(lower)) ||
+      (a.code && a.code.toLowerCase().includes(lower))
+    ).slice(0, 10); // limit to 10 suggestions
+  };
+
+  // Handlers for origin autocomplete
+  const handleOriginInput = (e) => {
+    const value = e.target.value;
+    setOriginInput(value);
+    setShowOriginSuggestions(true);
+    setOriginSuggestions(filterAirports(value));
+    // Don't update form yet, only on selection
+  };
+  const handleOriginSelect = (airport) => {
+    setOriginInput(`${airport.city ? airport.city + ' - ' : ''}${airport.name} (${airport.code})`);
+    setShowOriginSuggestions(false);
+    setOriginSuggestions([]);
+    // Update form with IATA code
+    handleChange({ target: { name: "origin", value: airport.code } });
+  };
+
+  // Handlers for destination autocomplete
+  const handleDestInput = (e) => {
+    const value = e.target.value;
+    setDestInput(value);
+    setShowDestSuggestions(true);
+    setDestSuggestions(filterAirports(value));
+  };
+  const handleDestSelect = (airport) => {
+    setDestInput(`${airport.city ? airport.city + ' - ' : ''}${airport.name} (${airport.code})`);
+    setShowDestSuggestions(false);
+    setDestSuggestions([]);
+    handleChange({ target: { name: "destination", value: airport.code } });
+  };
+
   return (
     <div className="space-y-6">
       {/* Form Header */}
@@ -12,38 +67,70 @@ export default function FlightSearchForm({ form, handleChange, handleSubmit, loa
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
         {/* Route Selection */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="group">
+          <div className="group relative">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors">
               <MapPin className="w-4 h-4 inline mr-1 text-blue-500" />
               From
             </label>
             <input
               type="text"
-              name="origin"
-              value={form.origin}
-              onChange={handleChange}
+              name="origin_autocomplete"
+              value={originInput}
+              onChange={handleOriginInput}
+              onFocus={() => setShowOriginSuggestions(true)}
+              ref={originRef}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
-              placeholder="Airport code (e.g., YYZ)"
+              placeholder="Enter city, airport, or code"
+              autoComplete="off"
               required
             />
+            {showOriginSuggestions && originSuggestions.length > 0 && (
+              <ul className="absolute z-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mt-1 w-full max-h-60 overflow-y-auto shadow-xl">
+                {originSuggestions.map((a, idx) => (
+                  <li
+                    key={a.code + idx}
+                    className="px-4 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/40"
+                    onMouseDown={() => handleOriginSelect(a)}
+                  >
+                    <span className="font-semibold">{a.city ? a.city + ' - ' : ''}{a.name}</span> <span className="text-blue-600 dark:text-blue-300">({a.code})</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-          <div className="group">
+          <div className="group relative">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 transition-colors">
               <MapPin className="w-4 h-4 inline mr-1 text-green-500" />
               To
             </label>
             <input
               type="text"
-              name="destination"
-              value={form.destination}
-              onChange={handleChange}
+              name="destination_autocomplete"
+              value={destInput}
+              onChange={handleDestInput}
+              onFocus={() => setShowDestSuggestions(true)}
+              ref={destRef}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
-              placeholder="Airport code (e.g., KTM)"
+              placeholder="Enter city, airport, or code"
+              autoComplete="off"
               required
             />
+            {showDestSuggestions && destSuggestions.length > 0 && (
+              <ul className="absolute z-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg mt-1 w-full max-h-60 overflow-y-auto shadow-xl">
+                {destSuggestions.map((a, idx) => (
+                  <li
+                    key={a.code + idx}
+                    className="px-4 py-2 cursor-pointer hover:bg-green-100 dark:hover:bg-green-900/40"
+                    onMouseDown={() => handleDestSelect(a)}
+                  >
+                    <span className="font-semibold">{a.city ? a.city + ' - ' : ''}{a.name}</span> <span className="text-green-600 dark:text-green-300">({a.code})</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
 
