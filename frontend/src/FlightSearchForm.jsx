@@ -23,7 +23,8 @@ export default function FlightSearchForm({ form, handleChange, handleSubmit, loa
     return airports.filter(a =>
       (a.city && a.city.toLowerCase().includes(lower)) ||
       (a.name && a.name.toLowerCase().includes(lower)) ||
-      (a.code && a.code.toLowerCase().includes(lower))
+      (a.code && a.code.toLowerCase().includes(lower)) ||
+      (a.icao && a.icao.toLowerCase().includes(lower))
     ).slice(0, 10); // limit to 10 suggestions
   };
 
