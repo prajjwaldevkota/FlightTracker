@@ -4,20 +4,30 @@ import { useState, useEffect, useCallback } from "react";
 import AutocompleteField from "./component/AutocompleteField";
 
 const currencyList = [
-  { code: "USD", name: "US Dollar" }, { code: "CAD", name: "Canadian Dollar" },
-  { code: "EUR", name: "Euro" }, { code: "GBP", name: "British Pound" },
-  { code: "AUD", name: "Australian Dollar" }, { code: "JPY", name: "Japanese Yen" },
-  { code: "SGD", name: "Singapore Dollar" }, { code: "HKD", name: "Hong Kong Dollar" },
-  { code: "INR", name: "Indian Rupee" }, { code: "KRW", name: "South Korean Won" },
+  { code: "USD", name: "US Dollar" },
+  { code: "CAD", name: "Canadian Dollar" },
+  { code: "EUR", name: "Euro" },
+  { code: "GBP", name: "British Pound" },
+  { code: "AUD", name: "Australian Dollar" },
+  { code: "JPY", name: "Japanese Yen" },
+  { code: "SGD", name: "Singapore Dollar" },
+  { code: "HKD", name: "Hong Kong Dollar" },
+  { code: "INR", name: "Indian Rupee" },
+  { code: "KRW", name: "South Korean Won" },
 ];
 
-export default function FlightSearchForm({ form, handleChange, handleSubmit, loading }) {
+export default function FlightSearchForm({
+  form,
+  handleChange,
+  handleSubmit,
+  loading,
+}) {
   const [availableCurrencies, setAvailableCurrencies] = useState(currencyList);
   const [originInput, setOriginInput] = useState("");
   const [destInput, setDestInput] = useState("");
   const [errors, setErrors] = useState({});
 
-  const getTodayDate = () => new Date().toISOString().split('T')[0];
+  const getTodayDate = () => new Date().toISOString().split("T")[0];
 
   // Currency fetching logic
   useEffect(() => {
@@ -27,15 +37,21 @@ export default function FlightSearchForm({ form, handleChange, handleSubmit, loa
         .then((data) => {
           if (data.currency) {
             setAvailableCurrencies((prev) => {
-              const exists = prev.some(c => c.code === data.currency);
-              return exists ? prev : [...prev, { code: data.currency, name: data.currency_name }];
+              const exists = prev.some((c) => c.code === data.currency);
+              return exists
+                ? prev
+                : [...prev, { code: data.currency, name: data.currency_name }];
             });
-            handleChange({ target: { name: "currency", value: data.currency } });
+            handleChange({
+              target: { name: "currency", value: data.currency },
+            });
           } else {
             handleChange({ target: { name: "currency", value: "USD" } });
           }
         })
-        .catch(() => handleChange({ target: { name: "currency", value: "USD" } }));
+        .catch(() =>
+          handleChange({ target: { name: "currency", value: "USD" } })
+        );
     }
   }, [form.currency, handleChange]);
 
@@ -43,9 +59,12 @@ export default function FlightSearchForm({ form, handleChange, handleSubmit, loa
     const newErrors = {};
     const today = getTodayDate();
     if (!form.origin) newErrors.origin = "Please select an origin airport.";
-    if (!form.destination) newErrors.destination = "Please select a destination airport.";
-    if (form.departure_date < today) newErrors.departure_date = "Departure date cannot be in the past.";
-    if (form.return_date && form.return_date < form.departure_date) newErrors.return_date = "Return date must be after departure.";
+    if (!form.destination)
+      newErrors.destination = "Please select a destination airport.";
+    if (form.departure_date < today)
+      newErrors.departure_date = "Departure date cannot be in the past.";
+    if (form.return_date && form.return_date < form.departure_date)
+      newErrors.return_date = "Return date must be after departure.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }, [form]);
@@ -54,14 +73,18 @@ export default function FlightSearchForm({ form, handleChange, handleSubmit, loa
   const handleDateChange = (e) => {
     const { name, value } = e.target;
     handleChange(e); // Call the parent handler first
-    
+
     // Clear related errors
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: undefined }));
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
-    
+
     // Auto-clear return date if it's before the new departure date
-    if (name === 'departure_date' && form.return_date && value > form.return_date) {
+    if (
+      name === "departure_date" &&
+      form.return_date &&
+      value > form.return_date
+    ) {
       handleChange({ target: { name: "return_date", value: "" } });
     }
   };
@@ -88,7 +111,11 @@ export default function FlightSearchForm({ form, handleChange, handleSubmit, loa
         </div>
       </div>
 
-      <form onSubmit={handleFormSubmit} className="space-y-6 sm:space-y-8" autoComplete="off">
+      <form
+        onSubmit={handleFormSubmit}
+        className="space-y-6 sm:space-y-8"
+        autoComplete="off"
+      >
         {/* Route Selection with Swap Button */}
         <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4">
           <AutocompleteField
@@ -99,7 +126,7 @@ export default function FlightSearchForm({ form, handleChange, handleSubmit, loa
             setInput={setOriginInput}
             handleChange={handleChange}
             error={errors.origin}
-            clearError={() => setErrors(p => ({ ...p, origin: undefined }))}
+            clearError={() => setErrors((p) => ({ ...p, origin: undefined }))}
           />
           <div className="flex justify-center md:pt-8">
             <button
@@ -119,10 +146,11 @@ export default function FlightSearchForm({ form, handleChange, handleSubmit, loa
             setInput={setDestInput}
             handleChange={handleChange}
             error={errors.destination}
-            clearError={() => setErrors(p => ({ ...p, destination: undefined }))}
+            clearError={() =>
+              setErrors((p) => ({ ...p, destination: undefined }))
+            }
           />
         </div>
-        
 
         <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4 lg:gap-6">
           <div className="group">
@@ -137,13 +165,31 @@ export default function FlightSearchForm({ form, handleChange, handleSubmit, loa
               onChange={handleDateChange}
               min={getTodayDate()}
               className={`w-full px-3 py-3 sm:px-5 sm:py-4 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border ${
-                errors.departure_date ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-              } rounded-lg sm:rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 transition-all duration-300 hover:bg-white/80 dark:hover:bg-gray-800/80 shadow-lg [color-scheme:light] dark:[color-scheme:dark] text-sm sm:text-base`}
-              aria-describedby={errors.departure_date ? "departure-error" : undefined}
+                errors.departure_date
+                  ? "border-red-500"
+                  : "border-gray-300 dark:border-gray-600"
+              } rounded-lg sm:rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 transition-all duration-300 hover:bg-white/80 dark:hover:bg-gray-800/80 shadow-lg [color-scheme:light] dark:[color-scheme:dark] text-sm sm:text-base 
+[-webkit-appearance:none] 
+[&::-webkit-date-and-time-value]:text-left 
+[&::-webkit-calendar-picker-indicator]:opacity-100
+[&::-webkit-calendar-picker-indicator]:cursor-pointer
+[&::-webkit-calendar-picker-indicator]:filter-none
+box-border
+min-h-[44px] sm:min-h-[52px]
+max-w-full
+overflow-visible`}
+              aria-describedby={
+                errors.departure_date ? "departure-error" : undefined
+              }
               required
             />
             {errors.departure_date && (
-              <div id="departure-error" className="text-red-500 text-xs mt-1 break-words">{errors.departure_date}</div>
+              <div
+                id="departure-error"
+                className="text-red-500 text-xs mt-1 break-words"
+              >
+                {errors.departure_date}
+              </div>
             )}
           </div>
           <div className="group">
@@ -158,12 +204,28 @@ export default function FlightSearchForm({ form, handleChange, handleSubmit, loa
               onChange={handleDateChange}
               min={form.departure_date || getTodayDate()}
               className={`w-full px-3 py-3 sm:px-5 sm:py-4 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border ${
-                errors.return_date ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-              } rounded-lg sm:rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 transition-all duration-300 hover:bg-white/80 dark:hover:bg-gray-800/80 shadow-lg [color-scheme:light] dark:[color-scheme:dark] text-sm sm:text-base`}
+                errors.return_date
+                  ? "border-red-500"
+                  : "border-gray-300 dark:border-gray-600"
+              } rounded-lg sm:rounded-xl lg:rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 transition-all duration-300 hover:bg-white/80 dark:hover:bg-gray-800/80 shadow-lg [color-scheme:light] dark:[color-scheme:dark] text-sm sm:text-base 
+[-webkit-appearance:none] 
+[&::-webkit-date-and-time-value]:text-left 
+[&::-webkit-calendar-picker-indicator]:opacity-100
+[&::-webkit-calendar-picker-indicator]:cursor-pointer
+[&::-webkit-calendar-picker-indicator]:filter-none
+box-border
+min-h-[44px] sm:min-h-[52px]
+max-w-full
+overflow-visible`}
               aria-describedby={errors.return_date ? "return-error" : undefined}
             />
             {errors.return_date && (
-              <div id="return-error" className="text-red-500 text-xs mt-1 break-words">{errors.return_date}</div>
+              <div
+                id="return-error"
+                className="text-red-500 text-xs mt-1 break-words"
+              >
+                {errors.return_date}
+              </div>
             )}
           </div>
         </div>
@@ -176,8 +238,13 @@ export default function FlightSearchForm({ form, handleChange, handleSubmit, loa
               Adults
             </label>
             <input
-              type="number" name="adults" value={form.adults} onChange={handleChange}
-              min="1" max="9" required
+              type="number"
+              name="adults"
+              value={form.adults}
+              onChange={handleChange}
+              min="1"
+              max="9"
+              required
               className="w-full px-3 sm:px-4 py-3 sm:py-4 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 shadow-lg text-sm sm:text-base"
             />
           </div>
@@ -187,8 +254,12 @@ export default function FlightSearchForm({ form, handleChange, handleSubmit, loa
               Children
             </label>
             <input
-              type="number" name="children" value={form.children} onChange={handleChange}
-              min="0" max="9"
+              type="number"
+              name="children"
+              value={form.children}
+              onChange={handleChange}
+              min="0"
+              max="9"
               className="w-full px-3 sm:px-4 py-3 sm:py-4 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 shadow-lg text-sm sm:text-base"
             />
           </div>
@@ -198,8 +269,12 @@ export default function FlightSearchForm({ form, handleChange, handleSubmit, loa
               Infants
             </label>
             <input
-              type="number" name="infants" value={form.infants} onChange={handleChange}
-              min="0" max="9"
+              type="number"
+              name="infants"
+              value={form.infants}
+              onChange={handleChange}
+              min="0"
+              max="9"
               className="w-full px-3 sm:px-4 py-3 sm:py-4 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 shadow-lg text-sm sm:text-base"
             />
           </div>
@@ -208,11 +283,17 @@ export default function FlightSearchForm({ form, handleChange, handleSubmit, loa
               Currency
             </label>
             <select
-              name="currency" value={form.currency || "USD"} onChange={handleChange}
+              name="currency"
+              value={form.currency || "USD"}
+              onChange={handleChange}
               className="w-full px-3 sm:px-4 py-3 sm:py-4 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 shadow-lg text-sm sm:text-base"
             >
               {availableCurrencies.map((c) => (
-                <option key={c.code} value={c.code} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                <option
+                  key={c.code}
+                  value={c.code}
+                  className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                >
                   {c.code} - {c.name}
                 </option>
               ))}

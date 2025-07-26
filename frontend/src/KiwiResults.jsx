@@ -1,5 +1,6 @@
 import { Plane, PlaneTakeoff, PlaneLanding, Clock, AlertTriangle, ExternalLink } from "lucide-react"
 import { CalendarIcon } from "./Icons"
+import { formatCurrency } from "./utils"
 
 const TravelHackChips = {
   virtualInterlining: {
