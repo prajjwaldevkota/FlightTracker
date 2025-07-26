@@ -1,5 +1,7 @@
 import { Plane, Clock, ExternalLink, PlaneTakeoff, PlaneLanding } from "lucide-react"
 import { CalendarIcon } from "./Icons"
+import { formatCurrency } from "./utils"
+
 
 // Helper function to format flight duration
 const formatDuration = (segment) => {
@@ -20,6 +22,7 @@ const formatDuration = (segment) => {
 
 export default function MainResults({ results, form, darkMode = false }) {
   if (!results || results.length === 0) return null
+  console.log(results)
 
   return (
     <div className="w-full mb-12 px-4 sm:px-6 lg:px-8">
@@ -63,8 +66,7 @@ export default function MainResults({ results, form, darkMode = false }) {
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {flight.price}{" "}
-                      <span className="text-lg font-normal text-gray-600 dark:text-gray-400">{flight.currency}</span>
+                      {formatCurrency(flight.price, flight.currency)}{" "}
                     </div>
                     <div className="flex gap-2 mt-2">
                       {flight.validatingAirlineCodes?.map((code) => (
